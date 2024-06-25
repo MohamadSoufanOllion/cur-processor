@@ -1,0 +1,29 @@
+{
+  "name": "cur-processor",
+  "version": "0.1.0",
+  "bin": {
+    "cur-processor": "bin/cur-processor.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "local-synth": "npm run build && cdk synth --no-staging > template.yaml --profile joey",
+    "deploy": "cdk deploy --profile joey"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "20.14.2",
+    "@types/source-map-support": "^0.5.10",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.4",
+    "aws-cdk": "2.147.1",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.4.5"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "2.147.1",
+    "constructs": "^10.0.0",
+    "source-map-support": "^0.5.21"
+  }
+}
