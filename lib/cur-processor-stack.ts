@@ -58,6 +58,7 @@ export class CurProcessorStack extends cdk.Stack {
       handler: 'cur_processing_handler.main',
       code: lambda.Code.fromAsset(path.join('lambda/cur_processing')),
       environment: {
+        CUR_BUCKET_NAME: curBucket.bucketName,
         PROCESSED_BUCKET_NAME: processedDataBucket.bucketName,
         SNS_TOPIC_ARN: snsTopic.topicArn,
       },
@@ -118,12 +119,12 @@ export class CurProcessorStack extends cdk.Stack {
       },
     });
 
-    const database = new glue.CfnDatabase(this, 'AthenaDatabase', {
-      catalogId: this.account,
-      databaseInput: {
-        name: 'cur_processed_data',
-      },
-    });
+    // const database = new glue.CfnDatabase(this, 'AthenaDatabase', {
+    //   catalogId: this.account,
+    //   databaseInput: {
+    //     name: 'cur_processed_data',
+    //   },
+    // });
 
     const workgroup = new athena.CfnWorkGroup(this, 'AthenaWorkgroup', {
       name: 'cur-workgroup',
