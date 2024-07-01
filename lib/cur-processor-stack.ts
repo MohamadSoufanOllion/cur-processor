@@ -90,27 +90,27 @@ export class CurProcessorStack extends cdk.Stack {
       managedPolicies: [iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSGlueServiceRole')],
     });
 
-    const curParsingJob = new glue.CfnJob(this, 'CURParsingJob', {
-      role: glueRole.roleArn,
-      command: {
-        name: 'glueetl',
-        scriptLocation: `s3://${scriptBucket.bucketName}/scripts/cur_parsing.py`,
-        pythonVersion: '3',
-      },
-      defaultArguments: {
-        '--additional-python-modules': 'pandas,polars',
-        '--enable-metrics': '',
-      },
-      maxCapacity: 2.0,
-    });
+    // const curParsingJob = new glue.CfnJob(this, 'CURParsingJob', {
+    //   role: glueRole.roleArn,
+    //   command: {
+    //     name: 'glueetl',
+    //     scriptLocation: `s3://${scriptBucket.bucketName}/scripts/cur_parsing.py`,
+    //     pythonVersion: '3',
+    //   },
+    //   defaultArguments: {
+    //     '--additional-python-modules': 'pandas,polars',
+    //     '--enable-metrics': '',
+    //   },
+    //   maxCapacity: 2.0,
+    // });
 
     const glueCrawler = new glue.CfnCrawler(this, 'ProcessedDataCrawler', {
       role: glueRole.roleArn,
-      databaseName: 'cur_processed_data',
+      databaseName: 'default',
       targets: {
         s3Targets: [
           {
-            path: `s3://${processedDataBucket.bucketName}/`,
+            path: `s3://${curBucket.bucketName}/`,
           },
         ],
       },
@@ -119,7 +119,7 @@ export class CurProcessorStack extends cdk.Stack {
       },
     });
 
-    // const database = new glue.CfnDatabase(this, 'AthenaDatabase', {
+    // const database = new glue.CfnDatabase(this, 'GlueDatabase', {
     //   catalogId: this.account,
     //   databaseInput: {
     //     name: 'cur_processed_data',
