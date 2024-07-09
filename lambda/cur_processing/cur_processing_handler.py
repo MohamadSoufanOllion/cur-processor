@@ -16,7 +16,7 @@ def main(event, context):
         
         copy_source = {
             'Bucket': processed_bucket,
-            'Key': 'processed_cur_file.csv'
+            'Key': event.Records[0].s3.object.Key
         }
         s3_client.copy(copy_source, cur_bucket, 'refreshed/processed_cur_file.csv')
         

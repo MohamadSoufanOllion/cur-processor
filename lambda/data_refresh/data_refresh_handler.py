@@ -14,11 +14,11 @@ def main(event, context):
         # Example logic for data refresh (this should be replaced with actual logic)
         # For demonstration, we are copying the processed CUR file to another location
         
-        copy_source = {
-            'Bucket': processed_bucket,
-            'Key': 'processed_cur_file.csv'
-        }
-        s3_client.copy(copy_source, cur_bucket, 'refreshed/processed_cur_file.csv')
+        # copy_source = {
+        #     'Bucket': processed_bucket,
+        #     'Key': 'processed_cur_file.csv'
+        # }
+        # s3_client.copy(copy_source, cur_bucket, 'refreshed/processed_cur_file.csv')
         
         # Publish success message to SNS
         sns_client.publish(
