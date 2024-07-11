@@ -6,6 +6,7 @@ s3_client = boto3.client('s3')
 sns_client = boto3.client('sns')
 
 def main(event, context):
+    print(event)
     cur_bucket = os.environ['CUR_BUCKET_NAME']
     processed_bucket = os.environ['PROCESSED_BUCKET_NAME']
     sns_topic_arn = os.environ['SNS_TOPIC_ARN']

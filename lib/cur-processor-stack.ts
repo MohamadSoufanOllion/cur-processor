@@ -58,7 +58,6 @@ export class CurProcessorStack extends cdk.Stack {
       handler: 'cur_processing_handler.main',
       code: lambda.Code.fromAsset(path.join('lambda/cur_processing')),
       environment: {
-        CUR_BUCKET_NAME: curBucket.bucketName,
         PROCESSED_BUCKET_NAME: processedDataBucket.bucketName,
         SNS_TOPIC_ARN: snsTopic.topicArn,
       },
@@ -76,11 +75,20 @@ export class CurProcessorStack extends cdk.Stack {
       },
     });
 
-    processedDataBucket.grantWrite(curProcessingLambda);
-    curBucket.grantRead(curProcessingLambda);
+    // Create a custom policy to add HeadObject permission
+    const headObjectPolicy = new iam.PolicyStatement({
+      actions: ['s3:HeadObject'],
+      resources: [curBucket.bucketArn + '/*'],
+    });
 
-    processedDataBucket.grantWrite(dataRefreshLambda);
+    // Attach the custom policy to the Lambda function's role
+    curProcessingLambda.addToRolePolicy(headObjectPolicy);
+    curBucket.grantRead(curProcessingLambda);
+    processedDataBucket.grantWrite(curProcessingLambda);
+
+    dataRefreshLambda.addToRolePolicy(headObjectPolicy);
     curBucket.grantRead(dataRefreshLambda);
+    processedDataBucket.grantWrite(dataRefreshLambda);
 
     snsTopic.grantPublish(curProcessingLambda);
     snsTopic.grantPublish(dataRefreshLambda);
