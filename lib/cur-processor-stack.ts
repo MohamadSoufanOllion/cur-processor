@@ -16,7 +16,7 @@ import * as snsSubscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
 import * as path from 'path';
 
 const EMAIL_ADDRESS_FOR_NOTIFICATIONS = 'mohamad.soufan@ollion.com';
-
+const CUR_REPORT_FOLDER_DESTINATION = 'cur-data';
 export class CurProcessorStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -97,6 +97,8 @@ export class CurProcessorStack extends cdk.Stack {
       assumedBy: new iam.ServicePrincipal('glue.amazonaws.com'),
       managedPolicies: [iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSGlueServiceRole')],
     });
+    glueRole.addToPolicy(headObjectPolicy);
+    curBucket.grantRead(glueRole);
 
     // const curParsingJob = new glue.CfnJob(this, 'CURParsingJob', {
     //   role: glueRole.roleArn,
@@ -112,27 +114,31 @@ export class CurProcessorStack extends cdk.Stack {
     //   maxCapacity: 2.0,
     // });
 
+    const dbName = 'cur-processed-data';
+    const database = new glue.CfnDatabase(this, 'GlueDatabase', {
+      catalogId: this.account,
+      databaseInput: {
+        name: dbName,
+      },
+    });
+    const onceEvery12Hours = 'cron(0 0/12 * * ? *)';
+
+    // s3://curprocessorstack-curbucket1acad2a6-josrlebznwwi/cur-data/CurProcessorExport/data/BILLING_PERIOD=2024-07/CurProcessorExport-00001.snappy.parquet
     const glueCrawler = new glue.CfnCrawler(this, 'ProcessedDataCrawler', {
       role: glueRole.roleArn,
-      databaseName: 'default',
+      databaseName: database.ref,
+      name: 'cur-crawler',
       targets: {
         s3Targets: [
           {
-            path: `s3://${curBucket.bucketName}/`,
+            path: `s3://${curBucket.bucketName}/${CUR_REPORT_FOLDER_DESTINATION}/CurProcessorExport/data/BILLING_PERIOD=2024-07/`,
           },
         ],
       },
       schedule: {
-        scheduleExpression: 'cron(0 0 1 * ? *)', // Runs monthly
+        scheduleExpression: onceEvery12Hours, // Runs every 12
       },
     });
-
-    // const database = new glue.CfnDatabase(this, 'GlueDatabase', {
-    //   catalogId: this.account,
-    //   databaseInput: {
-    //     name: 'cur_processed_data',
-    //   },
-    // });
 
     const workgroup = new athena.CfnWorkGroup(this, 'AthenaWorkgroup', {
       name: 'cur-workgroup',

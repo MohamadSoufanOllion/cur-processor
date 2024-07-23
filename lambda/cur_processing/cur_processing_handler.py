@@ -14,16 +14,16 @@ def main(event, context):
         # Example logic for data refresh (this should be replaced with actual logic)
         # For demonstration, we are copying the processed CUR file to another location
         
-        copy_source = {
-            'Bucket': cur_bucket,
-            'Key': event["Records"][0]["s3"]["object"]["key"]
-        }
-        s3_client.copy(copy_source, processed_bucket, 'refreshed/processed_cur_file.csv')
+        # copy_source = {
+        #     'Bucket': cur_bucket,
+        #     'Key': event["Records"][0]["s3"]["object"]["key"]
+        # }
+        # s3_client.copy(copy_source, processed_bucket, 'refreshed/processed_cur_file.csv')
         
         # Publish success message to SNS
         sns_client.publish(
             TopicArn=sns_topic_arn,
-            Message=json.dumps({'default': 'Data refresh completed successfully!'}),
+            Message=json.dumps({'default': 'Data refresh completed successfully!', 'event': event}),
             Subject='Data Refresh Status',
             MessageStructure='json'
         )
