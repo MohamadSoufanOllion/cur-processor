@@ -14,6 +14,7 @@ import * as sns from 'aws-cdk-lib/aws-sns';
 import * as snsSubscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
 
 import * as path from 'path';
+import { createQuickSightResources } from './constructs/quick-sight';
 
 const EMAIL_ADDRESS_FOR_NOTIFICATIONS = 'mohamad.soufan@ollion.com';
 const CUR_REPORT_FOLDER_DESTINATION = 'cur-data';
@@ -44,13 +45,16 @@ export class CurProcessorStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
     });
+
+    createQuickSightResources(this);
+
     // Create SNS Topic
     const snsTopic = new sns.Topic(this, 'DataProcessingSNSTopic', {
       displayName: 'Data Processing Notifications',
     });
 
     // Optionally, add subscriptions to the topic
-    snsTopic.addSubscription(new snsSubscriptions.EmailSubscription(EMAIL_ADDRESS_FOR_NOTIFICATIONS));
+    // snsTopic.addSubscription(new snsSubscriptions.EmailSubscription(EMAIL_ADDRESS_FOR_NOTIFICATIONS));
 
     // CUR Processing Lambda
     const curProcessingLambda = new lambda.Function(this, 'CURProcessingLambda', {
