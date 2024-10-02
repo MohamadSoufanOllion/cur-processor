@@ -1,6 +1,7 @@
-# Welcome to your CDK TypeScript project
+# Current Usage Report Processor
 
-This is a blank project for CDK development with TypeScript.
+<img src="docs/Architecture.png">
+
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
