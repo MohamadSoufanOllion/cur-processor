@@ -3,6 +3,8 @@ import { Construct } from 'constructs';
 
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+
 import * as glue from 'aws-cdk-lib/aws-glue';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as athena from 'aws-cdk-lib/aws-athena';
@@ -23,10 +25,6 @@ export class CurProcessorStack extends cdk.Stack {
     super(scope, id, props);
 
     // The code that defines your stack goes here
-
-    // example resource
-    // const queue = new sqs.Queue(this, 'CurProcessorQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
 
     const curBucket = new s3.Bucket(this, 'CURBucket', {
       versioned: true,
@@ -77,6 +75,22 @@ export class CurProcessorStack extends cdk.Stack {
         PROCESSED_BUCKET_NAME: processedDataBucket.bucketName,
         SNS_TOPIC_ARN: snsTopic.topicArn,
       },
+    });
+
+    // Define the Lambda function
+    const cloudhealth = new NodejsFunction(this, 'cloudHealthLambda', {
+      entry: path.join(__dirname, '../lambda', '/cloudhealth/cldv3.ts'), // accepts .js, .jsx, .cjs, .mjs, .ts, .tsx, .cts and .mts files
+      handler: 'main', // defaults to 'handler'
+      bundling: {
+        // Use esbuild to bundle the Lambda with axios
+        minify: true,
+        // externalModules: ['aws-sdk'], // aws-sdk is provided by the Lambda runtime
+        esbuildArgs: {
+          '--packages': 'bundle',
+        },
+      },
+      memorySize: 128,
+      timeout: cdk.Duration.seconds(30),
     });
 
     // Create a custom policy to add HeadObject permission
@@ -163,19 +177,5 @@ export class CurProcessorStack extends cdk.Stack {
 
     // S3 Event Notification for CUR Processing
     curBucket.addEventNotification(s3.EventType.OBJECT_CREATED, new s3n.LambdaDestination(curProcessingLambda));
-
-    const sagemakerRole = new iam.Role(this, 'SageMakerRole', {
-      assumedBy: new iam.ServicePrincipal('sagemaker.amazonaws.com'),
-      managedPolicies: [iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSageMakerFullAccess')],
-    });
-
-    const notebookInstance = new sagemaker.CfnNotebookInstance(this, 'NotebookInstance', {
-      instanceType: 'ml.t2.medium',
-      roleArn: sagemakerRole.roleArn,
-      notebookInstanceName: 'CURProcessingNotebook',
-      volumeSizeInGb: 10,
-      directInternetAccess: 'Enabled',
-      rootAccess: 'Enabled',
-    });
   }
 }

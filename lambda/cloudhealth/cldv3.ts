@@ -21,6 +21,7 @@ import axios from 'axios';
 import * as fs from 'fs';
 import { CHTOrganization, CHTAccount, getOrganizations, getOrganizationAccounts } from './class_cloudhealth'; // Import your local modules
 import {} from './aws_functions';
+import { BLACKBOOK_ACCOUNTS } from './blackbook-accounts';
 
 // Initialize AWS SDK clients
 const s3Client = new S3Client({ region: 'us-east-1' });
@@ -31,7 +32,7 @@ const apiKey: string = process.env.CHT_API_KEY || 'no_valid_default_value';
 // Main function to handle the process
 async function main() {
   try {
-    const response = await getOrganizations(apiKey);
+    const response = BLACKBOOK_ACCOUNTS || (await getOrganizations(apiKey));
     console.log(`Found ${response.length} Organizations`);
 
     let orgList: CHTOrganization[] = [];
@@ -59,28 +60,28 @@ async function main() {
 
       const accountTypes = [
         'aws_accounts',
-        'azure_subscriptions',
-        'gcp_compute_projects',
-        'data_center_accounts',
-        'vmware_csp_organizations',
+        // 'azure_subscriptions',
+        // 'gcp_compute_projects',
+        // 'data_center_accounts',
+        // 'vmware_csp_organizations',
       ];
 
       for (const accountType of accountTypes) {
         let accountList: CHTAccount[] = [];
-        if (org[`num_${accountType}`] > 0) {
-          const accounts = await getOrganizationAccounts(apiKey, org.id!, accountType);
-          accounts.forEach((a: any) => {
-            const account = CHTAccount.parse_api(a);
-            account.enrich_object('cloud_account', accountType);
+        // if (org[`num_${accountType}`] > 0) {
+        const accounts = BLACKBOOK_ACCOUNTS || (await getOrganizationAccounts(apiKey, org.id!, accountType));
+        accounts.forEach((a: any) => {
+          const account = CHTAccount.parse_api(a);
+          account.enrich_object('cloud_account', accountType);
 
-            if (!account.owner_id) {
-              account.owner_id = account.id;
-            }
+          if (!account.owner_id) {
+            account.owner_id = account.id;
+          }
 
-            accountList.push(account);
-          });
-          org.enrich_object(accountType, accountList);
-        }
+          accountList.push(account);
+        });
+        org.enrich_object(accountType, accountList);
+        // }
       }
 
       console.log(`Enriched Org #${i} with cloud account details`);

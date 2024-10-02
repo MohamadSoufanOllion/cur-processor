@@ -1,3 +1,5 @@
+# Place holder lambda
+
 import boto3
 import os
 import json
