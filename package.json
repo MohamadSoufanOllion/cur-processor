@@ -8,10 +8,10 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "local-synth": "npm run build && cdk synth --no-staging > template.yaml --profile hearst",
-    "bootstrap": "cdk bootstrap --profile hearst",
-    "bootstrap-role": "cdk bootstrap --profile hearst --role-arn arn:aws:iam::959584429587:role/AccessADMIN",
-    "deploy": "cdk deploy --profile hearst",
+    "local-synth": "npm run build && cdk synth --no-staging > template.yaml --profile hearst-quicksight",
+    "show-template": "cdk bootstrap --show-template > bootstrap-template.yaml --qualifier alo --profile hearst-quicksight",
+    "bootstrap-template": "cdk bootstrap --template bootstrap-template.yaml --toolkit-stack-name alo-CDKToolkit --profile hearst-quicksight",
+    "deploy": "cdk deploy --profile hearst-quicksight",
     "local-synth-joey": "npm run build && cdk synth --no-staging > template.yaml --profile joey",
     "deploy-joey": "cdk deploy --profile joey"
   },
@@ -28,6 +28,7 @@
     "typescript": "~5.4.5"
   },
   "dependencies": {
+    "@aws-sdk/client-bcm-data-exports": "^3.666.0",
     "@aws-sdk/client-s3": "^3.658.1",
     "@aws-sdk/client-ses": "^3.658.1",
     "aws-cdk-lib": "^2.160.0",
