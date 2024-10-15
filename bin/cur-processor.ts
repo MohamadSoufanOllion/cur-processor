@@ -6,6 +6,7 @@ import { MyCdkPipelineProjectStack } from '../lib/pipeline/cdk-pipeline';
 import { ACCOUNTS } from '../lib/config/aws';
 import { getDefaultStackSynthesizer } from './synth';
 
+console.log('CDK DEFAULT ACCOUNT', process.env.CDK_DEFAULT_ACCOUNT);
 
 if (process.env.CDK_DEFAULT_ACCOUNT === ACCOUNTS.OLLION_SANDBOX) {
   const app = new cdk.App();
