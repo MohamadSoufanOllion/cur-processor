@@ -16,7 +16,7 @@ import * as sns from 'aws-cdk-lib/aws-sns';
 import * as snsSubscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
 
 import * as path from 'path';
-import { createQuickSightResources } from './constructs/quick-sight';
+import { createQuickSightResources } from '../constructs/quick-sight';
 
 const EMAIL_ADDRESS_FOR_NOTIFICATIONS = 'mohamad.soufan@ollion.com';
 const CUR_REPORT_FOLDER_DESTINATION = 'cur-data';
@@ -78,20 +78,20 @@ export class CurProcessorStack extends cdk.Stack {
     });
 
     // Define the Lambda function
-    const cloudhealth = new NodejsFunction(this, 'cloudHealthLambda', {
-      entry: path.join(__dirname, '../lambda', '/cloudhealth/cldv3.ts'), // accepts .js, .jsx, .cjs, .mjs, .ts, .tsx, .cts and .mts files
-      handler: 'main', // defaults to 'handler'
-      bundling: {
-        // Use esbuild to bundle the Lambda with axios
-        minify: true,
-        // externalModules: ['aws-sdk'], // aws-sdk is provided by the Lambda runtime
-        esbuildArgs: {
-          '--packages': 'bundle',
-        },
-      },
-      memorySize: 128,
-      timeout: cdk.Duration.seconds(30),
-    });
+    // const cloudhealth = new NodejsFunction(this, 'cloudHealthLambda', {
+    //   entry: path.join(__dirname, '../lambda', '/cloudhealth/cldv3.ts'), // accepts .js, .jsx, .cjs, .mjs, .ts, .tsx, .cts and .mts files
+    //   handler: 'main', // defaults to 'handler'
+    //   bundling: {
+    //     // Use esbuild to bundle the Lambda with axios
+    //     minify: true,
+    //     // externalModules: ['aws-sdk'], // aws-sdk is provided by the Lambda runtime
+    //     esbuildArgs: {
+    //       '--packages': 'bundle',
+    //     },
+    //   },
+    //   memorySize: 128,
+    //   timeout: cdk.Duration.seconds(30),
+    // });
 
     // Create a custom policy to add HeadObject permission
     const headObjectPolicy = new iam.PolicyStatement({
@@ -177,5 +177,26 @@ export class CurProcessorStack extends cdk.Stack {
 
     // S3 Event Notification for CUR Processing
     curBucket.addEventNotification(s3.EventType.OBJECT_CREATED, new s3n.LambdaDestination(curProcessingLambda));
+
+    const sagemakerRole = new iam.Role(this, 'SageMakerRole', {
+      assumedBy: new iam.ServicePrincipal('sagemaker.amazonaws.com'),
+      managedPolicies: [iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSageMakerFullAccess')],
+    });
+
+    sagemakerRole.addToPolicy(
+      new iam.PolicyStatement({
+        actions: ['sts:AssumeRole'],
+        resources: ['arn:aws:iam::309136773508:role/OllionDataExport'],
+      }),
+    );
+
+    const notebookInstance = new sagemaker.CfnNotebookInstance(this, 'NotebookInstance', {
+      instanceType: 'ml.t2.medium',
+      roleArn: sagemakerRole.roleArn,
+      notebookInstanceName: 'CURProcessingNotebook',
+      volumeSizeInGb: 10,
+      directInternetAccess: 'Enabled',
+      rootAccess: 'Enabled',
+    });
   }
 }
