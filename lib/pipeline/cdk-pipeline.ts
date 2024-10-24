@@ -2,7 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { CodePipeline, CodePipelineSource, ShellStep } from 'aws-cdk-lib/pipelines';
 import { S3BucketStack } from '../stacks/primitive-stack';
-import { ClientStack } from '../stacks/secondary-stack';
+import { ClientStack } from '../stacks/client-stack';
 import { ACCOUNTS } from '../config/aws';
 
 const sourceConnectionArn = 'arn:aws:codeconnections:us-east-1:382938011234:connection/d9d4bae1-f2e7-40dc-8691-188907a4d95d';

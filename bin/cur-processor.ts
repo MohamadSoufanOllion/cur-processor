@@ -5,7 +5,7 @@ import { CurProcessorStack } from '../lib/stacks/cur-processor-stack';
 import { MyCdkPipelineProjectStack } from '../lib/pipeline/cdk-pipeline';
 import { ACCOUNTS } from '../lib/config/aws';
 import { getDefaultStackSynthesizer } from './synth';
-import { ClientStack } from '../lib/stacks/secondary-stack';
+import { ClientStack } from '../lib/stacks/client-stack';
 
 console.log('CDK DEFAULT ACCOUNT', process.env.CDK_DEFAULT_ACCOUNT);
 
