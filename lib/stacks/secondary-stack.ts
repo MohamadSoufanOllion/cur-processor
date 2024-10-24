@@ -11,7 +11,7 @@ const bcmCrossAccountArns = BCM_CROSS_ACCOUNT_ARNS;
 const destinationBucketArn = 'arn:aws:s3:::curprocessorstack-curbucket1acad2a6-josrlebznwwi'; // Replace with actual destination bucket ARN
 const destinationAccount = ACCOUNTS.OLLION_SANDBOX;
 
-export class AnotherStack extends cdk.Stack {
+export class ClientStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
