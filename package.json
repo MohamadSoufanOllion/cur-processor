@@ -16,7 +16,9 @@
     "deploy-ci": "cdk deploy --profile hearst-cicd --toolkit-stack-name alo-CDKToolkit",
     "deploy-ci-role": "cdk deploy --profile hearst-cicd --toolkit-stack-name alo-CDKToolkit -r arn:aws:iam::382938011234:role/alo-cdk-deploy-role-382938011234-us-east-1",
     "local-synth-joey": "npm run build && cdk synth --no-staging > template.yaml --profile joey",
-    "deploy-joey": "cdk deploy --profile joey"
+    "deploy-joey": "cdk deploy --profile joey",
+    "local-synth-joey-cross": "npm run build && cdk synth --no-staging > template.yaml --profile joey-cross",
+    "deploy-joey-cross": "cdk deploy --profile joey-cross"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
@@ -34,6 +36,7 @@
     "@aws-sdk/client-bcm-data-exports": "^3.666.0",
     "@aws-sdk/client-s3": "^3.658.1",
     "@aws-sdk/client-ses": "^3.658.1",
+    "@aws-sdk/client-sts": "^3.670.0",
     "aws-cdk-lib": "^2.160.0",
     "axios": "^1.7.7",
     "constructs": "^10.3.0",

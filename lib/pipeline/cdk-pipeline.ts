@@ -5,6 +5,7 @@ import { S3BucketStack } from '../stacks/primitive-stack';
 import { AnotherStack } from '../stacks/secondary-stack';
 import { ACCOUNTS } from '../config/aws';
 
+const sourceConnectionArn = 'arn:aws:codeconnections:us-east-1:382938011234:connection/d9d4bae1-f2e7-40dc-8691-188907a4d95d';
 export class MyCdkPipelineProjectStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -20,17 +21,17 @@ export class MyCdkPipelineProjectStack extends cdk.Stack {
 
     // Add S3BucketStack for multiple regions and accounts
     this.addStageForMultipleRegions(pipeline, 'S3Deployment', S3BucketStack, [
-    //   { account: ACCOUNTS.OLLION_SANDBOX, region: 'us-east-1' },
+      //   { account: ACCOUNTS.OLLION_SANDBOX, region: 'us-east-1' },
       { account: ACCOUNTS.QUICKSIGHT, region: 'us-east-1' },
       // Add other account/region combinations as needed
     ]);
 
     // Add AnotherStack for multiple regions and accounts
-    this.addStageForMultipleRegions(pipeline, 'AnotherStackDeployment', AnotherStack, [
-    //   { account: ACCOUNTS.OLLION_SANDBOX, region: 'us-east-1' },
-      { account: ACCOUNTS.QUICKSIGHT, region: 'us-east-1' },
-      // Add other account/region combinations as needed
-    ]);
+    // this.addStageForMultipleRegions(pipeline, 'AnotherStackDeployment', AnotherStack, [
+    // //   { account: ACCOUNTS.OLLION_SANDBOX, region: 'us-east-1' },
+    //   { account: ACCOUNTS.QUICKSIGHT, region: 'us-east-1' },
+    //   // Add other account/region combinations as needed
+    // ]);
   }
 
   // Helper function to add stages for various account/region combos
