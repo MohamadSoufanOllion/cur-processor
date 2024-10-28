@@ -18,6 +18,7 @@ import * as snsSubscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
 import * as path from 'path';
 import { createQuickSightResources } from '../constructs/quick-sight';
 import { ACCOUNTS } from '../config/aws';
+import { getEnvVar } from '../utils/env';
 
 const EMAIL_ADDRESS_FOR_NOTIFICATIONS = 'mohamad.soufan@ollion.com';
 const CUR_REPORT_FOLDER_DESTINATION = 'cur-data';
@@ -210,7 +211,7 @@ export class CurProcessorStack extends cdk.Stack {
     sagemakerRole.addToPolicy(
       new iam.PolicyStatement({
         actions: ['sts:AssumeRole'],
-        resources: ['arn:aws:iam::309136773508:role/OllionDataExport', 'arn:aws:iam::070284094934:role/CUR-cross-account'],
+        resources: [getEnvVar('CROSS_ACCOUNT_ROLE_ARN')],
       }),
     );
 

@@ -1,7 +1,8 @@
 import { BCMDataExportsClient, GetExportCommand } from '@aws-sdk/client-bcm-data-exports'; // ES Modules import
 // const { BCMDataExportsClient, GetExportCommand } = require("@aws-sdk/client-bcm-data-exports"); // CommonJS import
 import { AwsCredentialIdentity } from '@smithy/types';
-import { assumeRole, JOEY_CREDS, JOEY_CROSS_CREDS } from './assume-rule';
+import { assumeRole, INITIAL_SANDBOX_CRDS, INITIAL_CROSS_ACCOUNT_CREDS } from './assume-role';
+import { getEnvVar } from '../../lib/utils/env';
 // const { BCMDataExportsClient, ListExportsCommand } = require("@aws-sdk/client-bcm-data-exports"); // CommonJS import
 
 async function getExportWithAssumeRole() {
@@ -14,7 +15,7 @@ async function getExportWithAssumeRole() {
 }
 
 async function getExport(credentials?: AwsCredentialIdentity | null) {
-  const creds = credentials || JOEY_CREDS;
+  const creds = credentials || INITIAL_SANDBOX_CRDS;
   console.log(creds);
 
   const client = new BCMDataExportsClient({
@@ -22,8 +23,7 @@ async function getExport(credentials?: AwsCredentialIdentity | null) {
   });
   const input = {
     // GetExportRequest
-    // ExportArn: 'arn:aws:bcm-data-exports:us-east-1:070284094934:export/CostUsageReport_20240401-a85bb64f-39d2-4be9-908a-c3dfbcdc2834',
-    ExportArn: 'arn:aws:bcm-data-exports:us-east-1:070284094934:export/CUR_FOR_CROSS_ACCOUNT-70550114-8178-4de0-8ac5-738299c385e5', // required
+    ExportArn: getEnvVar('CUR_EXPORT_ARN'), // required
   };
   const command = new GetExportCommand(input);
   const response = await client.send(command);

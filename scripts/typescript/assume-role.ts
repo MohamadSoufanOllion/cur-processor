@@ -2,29 +2,30 @@ import { STSClient, AssumeRoleCommand } from '@aws-sdk/client-sts';
 import { AwsCredentialIdentity } from '@smithy/types';
 import { ACCOUNTS, EXTERNAL_ID } from '../../lib/config/aws';
 import * as dotenv from 'dotenv';
+import { getEnvVar } from '../../lib/utils/env';
 
 dotenv.config({ path: '../../.env' });
 
 // Usage example (ensure environment variables or default credentials are set)
-const CROSS_ACCOUNT_ROLE_ARN = process.env.CROSS_ACCOUNT_ROLE_ARN!; // Replace with your role ARN
+const CROSS_ACCOUNT_ROLE_ARN = getEnvVar('CROSS_ACCOUNT_ROLE_ARN'); // Replace with your role ARN
 const SESSION_NAME = '12345acdxdb'; // Session name can be anything descriptiv
 
-export const JOEY_CREDS = {
-  accessKeyId: process.env.JOEY_CREDS_ACCESS_KEY!,
-  secretAccessKey: process.env.JOEY_CREDS_ACCESS_SECRET!,
+export const INITIAL_SANDBOX_CRDS = {
+  accessKeyId: getEnvVar('JOEY_CREDS_ACCESS_KEY'),
+  secretAccessKey: getEnvVar('JOEY_CREDS_ACCESS_SECRET'),
   accountId: ACCOUNTS.INITIAL_SANDBOX,
 };
-export const JOEY_CROSS_CREDS = {
-  accessKeyId: process.env.JOEY_CROSS_CREDS_KEY!,
-  secretAccessKey: process.env.JOEY_CROSS_CREDS_SECRET!,
+export const INITIAL_CROSS_ACCOUNT_CREDS = {
+  accessKeyId: getEnvVar('JOEY_CROSS_CREDS_KEY'),
+  secretAccessKey: getEnvVar('JOEY_CROSS_CREDS_SECRET'),
   accountId: ACCOUNTS.INITIAL_CROSS_ACCOUNT,
 };
 
-console.log(JOEY_CREDS, JOEY_CROSS_CREDS);
+console.log(INITIAL_SANDBOX_CRDS, INITIAL_CROSS_ACCOUNT_CREDS);
 
 export async function assumeRole(roleArn: string = CROSS_ACCOUNT_ROLE_ARN, sessionName: string = SESSION_NAME) {
   // Create an STS client
-  const stsClient = new STSClient({ credentials: JOEY_CREDS });
+  const stsClient = new STSClient({ credentials: INITIAL_SANDBOX_CRDS });
 
   // Define the command to assume the role
   const command = new AssumeRoleCommand({

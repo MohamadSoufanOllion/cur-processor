@@ -1,4 +1,6 @@
 import * as iam from 'aws-cdk-lib/aws-iam';
+import { getEnvVar } from '../utils/env';
+import { MANAGED_CUR_TAG } from '../config/aws';
 
 export const bcmInlinePolicy = {
   policyName: 'bcm-cross-account-data-export',
@@ -14,7 +16,7 @@ export const bcmInlinePolicy = {
       resources: ['*'],
       conditions: {
         StringEquals: {
-          'aws:RequestTag/ManagedBy': 'OLLION',
+          [`aws:RequestTag/${MANAGED_CUR_TAG.key}`]: MANAGED_CUR_TAG.value,
         },
       },
     }),
@@ -24,14 +26,11 @@ export const bcmInlinePolicy = {
       resources: ['*'],
       conditions: {
         StringEquals: {
-          'aws:ResourceTag/ManagedBy': 'OLLION',
+          [`aws:ResourceTag/${MANAGED_CUR_TAG.key}`]: MANAGED_CUR_TAG.value,
         },
       },
     }),
   ],
 };
 
-export const BCM_CROSS_ACCOUNT_ARNS = [
-  'arn:aws:iam::187940856853:user/msoufan',
-  'arn:aws:iam::187940856853:role/CurProcessorStack-SageMakerRoleD4FCFA3F-P4VcmS7fyBai',
-];
+export const BCM_CROSS_ACCOUNT_ARNS = [getEnvVar('SOURCE_USER_ARN'), getEnvVar('SOURCE_ROLE_ARN')];

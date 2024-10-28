@@ -6,6 +6,9 @@ import { MyCdkPipelineProjectStack } from '../lib/pipeline/cdk-pipeline';
 import { ACCOUNTS } from '../lib/config/aws';
 import { getDefaultStackSynthesizer } from './synth';
 import { ClientStack } from '../lib/stacks/client-stack';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 console.log('CDK DEFAULT ACCOUNT', process.env.CDK_DEFAULT_ACCOUNT);
 

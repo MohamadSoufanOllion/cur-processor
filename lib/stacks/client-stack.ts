@@ -4,11 +4,12 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { ACCOUNTS, EXTERNAL_ID } from '../config/aws';
 import { BCM_CROSS_ACCOUNT_ARNS, bcmInlinePolicy } from '../constructs/bcm-cross-account-policy';
+import { getEnvVar } from '../utils/env';
 
 const sourceBucketName = 'temp-cur-source-bucket';
 const externalId = EXTERNAL_ID;
 const bcmCrossAccountArns = BCM_CROSS_ACCOUNT_ARNS;
-const destinationBucketArn = 'arn:aws:s3:::curprocessorstack-curbucket1acad2a6-josrlebznwwi'; // Replace with actual destination bucket ARN
+const destinationBucketArn = getEnvVar('DEST_BUCKET_ARN'); // Replace with actual destination bucket ARN
 const destinationAccount = ACCOUNTS.INITIAL_SANDBOX;
 
 export class ClientStack extends cdk.Stack {
@@ -77,6 +78,12 @@ export class ClientStack extends cdk.Stack {
       bucketName: sourceBucketName, // Replace with actual source bucket name
       versioningConfiguration: {
         status: 'Enabled',
+      },
+      publicAccessBlockConfiguration: {
+        blockPublicAcls: true,
+        ignorePublicAcls: false,
+        blockPublicPolicy: false,
+        restrictPublicBuckets: false,
       },
       replicationConfiguration: {
         role: replicationRole.roleArn,
