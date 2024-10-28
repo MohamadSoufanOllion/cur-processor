@@ -12,19 +12,19 @@ console.log('CDK DEFAULT ACCOUNT', process.env.CDK_DEFAULT_ACCOUNT);
 const currentAccount = process.env.CDK_DEFAULT_ACCOUNT;
 
 switch (currentAccount) {
-  case ACCOUNTS.OLLION_SANDBOX: {
+  case ACCOUNTS.INITIAL_SANDBOX: {
     const app = new cdk.App();
     new CurProcessorStack(app, 'CurProcessorStack', {
-      env: { account: ACCOUNTS.OLLION_SANDBOX, region: process.env.CDK_DEFAULT_REGION },
+      env: { account: ACCOUNTS.INITIAL_SANDBOX, region: process.env.CDK_DEFAULT_REGION },
     });
     break;
   }
 
-  case ACCOUNTS.OLLION_CROSS_ACCOUNT: {
+  case ACCOUNTS.INITIAL_CROSS_ACCOUNT: {
     const app = new cdk.App();
     // Create a different stack or configuration for OLLION_CROSS_ACCOUNT
     new ClientStack(app, 'CrossAccountStack', {
-      env: { account: ACCOUNTS.OLLION_CROSS_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+      env: { account: ACCOUNTS.INITIAL_CROSS_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
       // Adjust the region or any other configuration specific to this account
     });
     break;

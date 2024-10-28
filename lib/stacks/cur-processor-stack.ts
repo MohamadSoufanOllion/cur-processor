@@ -23,7 +23,7 @@ const EMAIL_ADDRESS_FOR_NOTIFICATIONS = 'mohamad.soufan@ollion.com';
 const CUR_REPORT_FOLDER_DESTINATION = 'cur-data';
 
 const sourceReplicationRolesArns = [
-  `arn:aws:iam::${ACCOUNTS.OLLION_CROSS_ACCOUNT}:role/CrossAccountStack-ReplicationRoleCE149CEC-uCXlV4L5GME2`,
+  `arn:aws:iam::${ACCOUNTS.INITIAL_CROSS_ACCOUNT}:role/CrossAccountStack-ReplicationRoleCE149CEC-uCXlV4L5GME2`,
 ];
 export class CurProcessorStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {

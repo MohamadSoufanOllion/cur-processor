@@ -9,7 +9,7 @@ const sourceBucketName = 'temp-cur-source-bucket';
 const externalId = EXTERNAL_ID;
 const bcmCrossAccountArns = BCM_CROSS_ACCOUNT_ARNS;
 const destinationBucketArn = 'arn:aws:s3:::curprocessorstack-curbucket1acad2a6-josrlebznwwi'; // Replace with actual destination bucket ARN
-const destinationAccount = ACCOUNTS.OLLION_SANDBOX;
+const destinationAccount = ACCOUNTS.INITIAL_SANDBOX;
 
 export class ClientStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
