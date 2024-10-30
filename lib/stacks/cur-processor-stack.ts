@@ -17,9 +17,16 @@ import * as snsSubscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
 
 import * as path from 'path';
 import { createQuickSightResources } from '../constructs/quick-sight';
+import { ACCOUNTS } from '../config/aws';
+import { getEnvVar } from '../utils/env';
+import { bcmBucketPolicyStatement } from '../constructs/bcm-cross-account-policy';
 
 const EMAIL_ADDRESS_FOR_NOTIFICATIONS = 'mohamad.soufan@ollion.com';
 const CUR_REPORT_FOLDER_DESTINATION = 'cur-data';
+
+const sourceReplicationRolesArns = [
+  `arn:aws:iam::${ACCOUNTS.INITIAL_CROSS_ACCOUNT}:role/CrossAccountStack-ReplicationRoleCE149CEC-uCXlV4L5GME2`,
+];
 export class CurProcessorStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -30,6 +37,27 @@ export class CurProcessorStack extends cdk.Stack {
       versioned: true,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
+    });
+    curBucket.addToResourcePolicy(
+      bcmBucketPolicyStatement({ bucketArn: curBucket.bucketArn, accountNumber: this.account, region: this.region }),
+    );
+    const clientsReplicationsPrincipals = sourceReplicationRolesArns.map((arn) => new iam.ArnPrincipal(arn));
+    curBucket.addToResourcePolicy(
+      new iam.PolicyStatement({
+        principals: clientsReplicationsPrincipals,
+        actions: [
+          's3:ReplicateDelete',
+          's3:ReplicateObject',
+          's3:ObjectOwnerOverrideToBucketOwner',
+          's3:GetBucketVersioning',
+          's3:PutBucketVersioning',
+        ],
+        resources: [`arn:aws:s3:::${curBucket.bucketName}/*`, `arn:aws:s3:::${curBucket.bucketName}`],
+      }),
+    );
+
+    new cdk.CfnOutput(this, 'DestBucketArn', {
+      value: curBucket.bucketArn,
     });
 
     const processedDataBucket = new s3.Bucket(this, 'ProcessedDataBucket', {
@@ -186,7 +214,7 @@ export class CurProcessorStack extends cdk.Stack {
     sagemakerRole.addToPolicy(
       new iam.PolicyStatement({
         actions: ['sts:AssumeRole'],
-        resources: ['arn:aws:iam::309136773508:role/OllionDataExport'],
+        resources: [getEnvVar('CROSS_ACCOUNT_ROLE_ARN')],
       }),
     );
 

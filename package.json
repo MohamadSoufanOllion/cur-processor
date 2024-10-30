@@ -40,6 +40,7 @@
     "aws-cdk-lib": "^2.160.0",
     "axios": "^1.7.7",
     "constructs": "^10.3.0",
+    "dotenv": "^16.4.5",
     "fs": "^0.0.1-security",
     "nodemailer": "^6.9.15",
     "source-map-support": "^0.5.21"
