@@ -19,6 +19,7 @@ import * as path from 'path';
 import { createQuickSightResources } from '../constructs/quick-sight';
 import { ACCOUNTS } from '../config/aws';
 import { getEnvVar } from '../utils/env';
+import { bcmBucketPolicyStatement } from '../constructs/bcm-cross-account-policy';
 
 const EMAIL_ADDRESS_FOR_NOTIFICATIONS = 'mohamad.soufan@ollion.com';
 const CUR_REPORT_FOLDER_DESTINATION = 'cur-data';
@@ -37,7 +38,9 @@ export class CurProcessorStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
     });
-
+    curBucket.addToResourcePolicy(
+      bcmBucketPolicyStatement({ bucketArn: curBucket.bucketArn, accountNumber: this.account, region: this.region }),
+    );
     const clientsReplicationsPrincipals = sourceReplicationRolesArns.map((arn) => new iam.ArnPrincipal(arn));
     curBucket.addToResourcePolicy(
       new iam.PolicyStatement({

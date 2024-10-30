@@ -3,7 +3,7 @@ import { Construct } from 'constructs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { ACCOUNTS, EXTERNAL_ID } from '../config/aws';
-import { BCM_CROSS_ACCOUNT_ARNS, bcmInlinePolicy } from '../constructs/bcm-cross-account-policy';
+import { BCM_CROSS_ACCOUNT_ARNS, bcmCfnBucketPolicyStatement, bcmInlinePolicy } from '../constructs/bcm-cross-account-policy';
 import { getEnvVar } from '../utils/env';
 
 const sourceBucketName = 'temp-cur-source-bucket';
@@ -114,29 +114,11 @@ export class ClientStack extends cdk.Stack {
     // Creating a policy for the source bucket
     new s3.CfnBucketPolicy(this, 'CURSourceBucketPolicy', {
       bucket: curSourceBucket.ref,
-      policyDocument: {
-        Version: '2012-10-17',
-        Statement: [
-          {
-            Sid: 'EnableAWSDataExportsToWriteToS3AndCheckPolicy',
-            Effect: 'Allow',
-            Principal: {
-              Service: ['billingreports.amazonaws.com', 'bcm-data-exports.amazonaws.com'],
-            },
-            Action: ['s3:PutObject', 's3:GetBucketPolicy'],
-            Resource: [curSourceBucket.attrArn, `${curSourceBucket.attrArn}/*`],
-            Condition: {
-              StringLike: {
-                'aws:SourceArn': [
-                  `arn:aws:cur:${this.region}:${curSourceAccountNumber}:definition/*`,
-                  `arn:aws:bcm-data-exports:${this.region}:${curSourceAccountNumber}:export/*`,
-                ],
-                'aws:SourceAccount': curSourceAccountNumber,
-              },
-            },
-          },
-        ],
-      },
+      policyDocument: bcmCfnBucketPolicyStatement({
+        bucketArn: curSourceBucket.attrArn,
+        accountNumber: curSourceAccountNumber,
+        region: this.region,
+      }),
     });
   }
 }
