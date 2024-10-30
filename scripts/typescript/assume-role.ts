@@ -11,13 +11,13 @@ const CROSS_ACCOUNT_ROLE_ARN = getEnvVar('CROSS_ACCOUNT_ROLE_ARN'); // Replace w
 const SESSION_NAME = '12345acdxdb'; // Session name can be anything descriptiv
 
 export const INITIAL_SANDBOX_CRDS = {
-  accessKeyId: getEnvVar('JOEY_CREDS_ACCESS_KEY'),
-  secretAccessKey: getEnvVar('JOEY_CREDS_ACCESS_SECRET'),
+  accessKeyId: getEnvVar('INITIAL_SANDBOX_CREDS_ACCESS_KEY'),
+  secretAccessKey: getEnvVar('INITIAL_SANDBOX_CREDS_ACCESS_SECRET'),
   accountId: ACCOUNTS.INITIAL_SANDBOX,
 };
 export const INITIAL_CROSS_ACCOUNT_CREDS = {
-  accessKeyId: getEnvVar('JOEY_CROSS_CREDS_KEY'),
-  secretAccessKey: getEnvVar('JOEY_CROSS_CREDS_SECRET'),
+  accessKeyId: getEnvVar('INITIAL_SANDBOX_CROSS_CREDS_KEY'),
+  secretAccessKey: getEnvVar('INITIAL_SANDBOX_CROSS_CREDS_SECRET'),
   accountId: ACCOUNTS.INITIAL_CROSS_ACCOUNT,
 };
 
