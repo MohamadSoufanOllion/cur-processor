@@ -5,6 +5,7 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import { ACCOUNTS, EXTERNAL_ID } from '../config/aws';
 import { BCM_CROSS_ACCOUNT_ARNS, bcmCfnBucketPolicyStatement, bcmInlinePolicy } from '../constructs/bcm-cross-account-policy';
 import { getEnvVar } from '../utils/env';
+import { QualifiedHearstStack } from '../constructs/qualified-hearst-stack';
 
 const sourceBucketName = 'temp-cur-source-bucket';
 const externalId = EXTERNAL_ID;
@@ -12,7 +13,7 @@ const bcmCrossAccountArns = BCM_CROSS_ACCOUNT_ARNS;
 const destinationBucketArn = getEnvVar('DEST_BUCKET_ARN'); // Replace with actual destination bucket ARN
 const destinationAccount = ACCOUNTS.INITIAL_SANDBOX;
 
-export class ClientStack extends cdk.Stack {
+export class ClientStack extends QualifiedHearstStack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 

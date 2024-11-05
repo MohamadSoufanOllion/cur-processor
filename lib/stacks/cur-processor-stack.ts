@@ -20,6 +20,7 @@ import { createQuickSightResources } from '../constructs/quick-sight';
 import { ACCOUNTS } from '../config/aws';
 import { getEnvVar } from '../utils/env';
 import { bcmBucketPolicyStatement } from '../constructs/bcm-cross-account-policy';
+import { QualifiedHearstStack } from '../constructs/qualified-hearst-stack';
 
 const EMAIL_ADDRESS_FOR_NOTIFICATIONS = 'mohamad.soufan@ollion.com';
 const CUR_REPORT_FOLDER_DESTINATION = 'cur-data';
@@ -27,7 +28,7 @@ const CUR_REPORT_FOLDER_DESTINATION = 'cur-data';
 const sourceReplicationRolesArns = [
   `arn:aws:iam::${ACCOUNTS.INITIAL_CROSS_ACCOUNT}:role/CrossAccountStack-ReplicationRoleCE149CEC-uCXlV4L5GME2`,
 ];
-export class CurProcessorStack extends cdk.Stack {
+export class CurProcessorStack extends QualifiedHearstStack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 

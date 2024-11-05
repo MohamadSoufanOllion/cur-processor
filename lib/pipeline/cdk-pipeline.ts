@@ -1,23 +1,36 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { CodePipeline, CodePipelineSource, ShellStep } from 'aws-cdk-lib/pipelines';
+// import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
+
+import { CodeBuildStep, CodePipeline, CodePipelineSource, ShellStep } from 'aws-cdk-lib/pipelines';
 import { S3BucketStack } from '../stacks/primitive-stack';
 import { ClientStack } from '../stacks/client-stack';
-import { ACCOUNTS } from '../config/aws';
+import { ACCOUNTS, QUALIFIER } from '../config/aws';
+import { getEnvVar } from '../utils/env';
+import { CODE_BUILD_ENV_VARS, ENVIRONMENT } from '../config/environment';
 
-const sourceConnectionArn = 'arn:aws:codeconnections:us-east-1:382938011234:connection/d9d4bae1-f2e7-40dc-8691-188907a4d95d';
+const sourceConnectionArn = getEnvVar('GITHUB_SOURCE_CONNECTION_ARN');
+const githubRepoName = getEnvVar('GITHUB_REPO_NAME');
 export class MyCdkPipelineProjectStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    // Assuming the secret is stored as 'my-github-token' in Secrets Manager
+    // const oauthToken = secretsmanager.Secret.fromSecretNameV2(this, 'GithubToken', GITHUB_TOKEN_SECRET_NAME);
+
     const pipeline = new CodePipeline(this, 'Pipeline', {
-      pipelineName: 'MyCDKPipeline',
+      pipelineName: `${QUALIFIER}-CurProcessorCDKPipeline`,
       crossAccountKeys: true, // Enable cross-account KMS encryption
-      synth: new ShellStep('Synth', {
-        input: CodePipelineSource.gitHub('MohamadSoufanOllion/cur-processor', 'main'),
+      synth: new CodeBuildStep('Synth', {
+        input: CodePipelineSource.connection(githubRepoName, 'main', { connectionArn: sourceConnectionArn }),
         commands: ['npm ci', 'npm run build', 'npx cdk synth'],
+        projectName: `${QUALIFIER}-CDK-Synth-CodeBuild-Project`,
+        env: ENVIRONMENT,
       }),
+      selfMutationCodeBuildDefaults: { buildEnvironment: { environmentVariables: CODE_BUILD_ENV_VARS } },
     });
+
+    // new cdk.CfnOutput(this, 'sdfa', { value: 'sdf' });
 
     // Add S3BucketStack for multiple regions and accounts
     this.addStageForMultipleRegions(pipeline, 'S3Deployment', S3BucketStack, [
@@ -38,12 +51,12 @@ export class MyCdkPipelineProjectStack extends cdk.Stack {
   private addStageForMultipleRegions(
     pipeline: CodePipeline,
     stageName: string,
-    stack: any,
+    stack: typeof cdk.Stack,
     targets: { account: string; region: string }[],
   ) {
     for (const target of targets) {
       pipeline.addStage(
-        new DeployStage(this, `${stageName}-${target.account}-${target.region}`, {
+        new DeployStage(this, `${QUALIFIER}-${stageName}-${target.account}-${target.region}`, {
           env: target,
           stack,
         }),
@@ -53,9 +66,9 @@ export class MyCdkPipelineProjectStack extends cdk.Stack {
 }
 
 class DeployStage extends cdk.Stage {
-  constructor(scope: Construct, id: string, props: { env: cdk.Environment; stack: any }) {
+  constructor(scope: Construct, id: string, props: { env: cdk.Environment; stack: typeof cdk.Stack }) {
     super(scope, id, { env: props.env });
 
-    new props.stack(this, `${props.stack.name}-${props.env.region}`);
+    new props.stack(this, `${QUALIFIER}-${props.stack.name}-${props.env.region}`, { env: props.env });
   }
 }
