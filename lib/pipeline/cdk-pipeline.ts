@@ -22,7 +22,7 @@ export class MyCdkPipelineProjectStack extends cdk.Stack {
       pipelineName: `${QUALIFIER}-CurProcessorCDKPipeline`,
       crossAccountKeys: true, // Enable cross-account KMS encryption
       synth: new CodeBuildStep('Synth', {
-        input: CodePipelineSource.connection(githubRepoName, 'main', { connectionArn: sourceConnectionArn }),
+        input: CodePipelineSource.connection(githubRepoName, 'ci-cd', { connectionArn: sourceConnectionArn }),
         commands: ['npm ci', 'npm run build', 'npx cdk synth'],
         projectName: `${QUALIFIER}-CDK-Synth-CodeBuild-Project`,
         env: ENVIRONMENT,
