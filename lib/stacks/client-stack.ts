@@ -20,7 +20,7 @@ export class ClientStack extends QualifiedHearstStack {
   constructor(scope: Construct, id: string, props: ClientStackProps) {
     super(scope, id, props);
 
-    const curBucketName = `${this.account}-props.curBucketName` || sourceBucketName;
+    const curBucketName = `${this.account}-${props.curBucketName}` || sourceBucketName;
 
     const arnPrincipals = bcmCrossAccountArns.map((arn) => new iam.ArnPrincipal(arn));
     const bcmCrossAccountRole = new iam.Role(this, 'CUR-Data-Export-Cross-Account-Role', {
