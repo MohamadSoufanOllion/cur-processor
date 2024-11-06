@@ -4,7 +4,7 @@ import { Construct } from 'constructs';
 
 import { CodeBuildStep, CodePipeline, CodePipelineSource, ShellStep } from 'aws-cdk-lib/pipelines';
 import { S3BucketStack } from '../stacks/primitive-stack';
-import { ClientStack } from '../stacks/client-stack';
+import { ClientStack, ClientStackProps } from '../stacks/client-stack';
 import { ACCOUNTS, QUALIFIER } from '../config/aws';
 import { getEnvVar } from '../utils/env';
 import { CODE_BUILD_ENV_VARS, ENVIRONMENT } from '../config/environment';
@@ -42,11 +42,17 @@ export class MyCdkPipelineProjectStack extends cdk.Stack {
     ]);
 
     // Add ClientStack for multiple regions and accounts
-    this.addStageForMultipleRegions(pipeline, 'ClientStackDeployment', ClientStack, [
-      //   { account: ACCOUNTS.OLLION_SANDBOX, region: 'us-east-1' },
-      { account: ACCOUNTS.NON_PROD_APP, region: 'us-east-1' },
-      // Add other account/region combinations as needed
-    ]);
+    this.addStageForMultipleRegions(
+      pipeline,
+      'ClientStackDeployment',
+      ClientStack,
+      [
+        //   { account: ACCOUNTS.OLLION_SANDBOX, region: 'us-east-1' },
+        { account: ACCOUNTS.NON_PROD_APP, region: 'us-east-1' },
+        // Add other account/region combinations as needed
+      ],
+      { curBucketName: `cur-data-export-bucket` } as ClientStackProps,
+    );
   }
 
   // Helper function to add stages for various account/region combos
@@ -55,12 +61,13 @@ export class MyCdkPipelineProjectStack extends cdk.Stack {
     stageName: string,
     stack: typeof cdk.Stack,
     targets: { account: string; region: string }[],
+    stackProps?: cdk.StackProps,
   ) {
     for (const target of targets) {
       pipeline.addStage(
-        new DeployStage(this, `${QUALIFIER}-${stageName}-${target.account}-${target.region}`, {
+        new DeployStage(this, `${QUALIFIER}-${stageName}-${target.account}-${target.region}`, stack, {
+          ...stackProps,
           env: target,
-          stack,
         }),
       );
     }
@@ -68,9 +75,9 @@ export class MyCdkPipelineProjectStack extends cdk.Stack {
 }
 
 class DeployStage extends cdk.Stage {
-  constructor(scope: Construct, id: string, props: { env: cdk.Environment; stack: typeof cdk.Stack }) {
+  constructor(scope: Construct, id: string, stack: typeof cdk.Stack, props: cdk.StackProps) {
     super(scope, id, { env: props.env });
 
-    new props.stack(this, `${QUALIFIER}-${props.stack.name}-${props.env.region}`, { env: props.env });
+    new stack(this, `${QUALIFIER}-${stack.name}-${props.env!.region}`, props);
   }
 }

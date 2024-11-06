@@ -13,9 +13,14 @@ const bcmCrossAccountArns = BCM_CROSS_ACCOUNT_ARNS;
 const destinationBucketArn = getEnvVar('DEST_BUCKET_ARN'); // Replace with actual destination bucket ARN
 const destinationAccount = ACCOUNTS.INITIAL_SANDBOX;
 
+export interface ClientStackProps extends cdk.StackProps {
+  curBucketName?: string;
+}
 export class ClientStack extends QualifiedHearstStack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: ClientStackProps) {
     super(scope, id, props);
+
+    const curBucketName = `${this.account}-props.curBucketName` || sourceBucketName;
 
     const arnPrincipals = bcmCrossAccountArns.map((arn) => new iam.ArnPrincipal(arn));
     const bcmCrossAccountRole = new iam.Role(this, 'CUR-Data-Export-Cross-Account-Role', {
@@ -51,8 +56,8 @@ export class ClientStack extends QualifiedHearstStack {
           's3:GetReplicationConfiguration',
         ],
         resources: [
-          `arn:aws:s3:::${sourceBucketName}`,
-          `arn:aws:s3:::${sourceBucketName}/*`, // Replace with your actual source bucket ARN pattern
+          `arn:aws:s3:::${curBucketName}`,
+          `arn:aws:s3:::${curBucketName}/*`, // Replace with your actual source bucket ARN pattern
         ],
       }),
     );
@@ -76,7 +81,7 @@ export class ClientStack extends QualifiedHearstStack {
 
     // Define the source bucket
     const curSourceBucket = new s3.CfnBucket(this, 'CURSourceBucket', {
-      bucketName: sourceBucketName, // Replace with actual source bucket name
+      bucketName: curBucketName, // Replace with actual source bucket name
       versioningConfiguration: {
         status: 'Enabled',
       },
