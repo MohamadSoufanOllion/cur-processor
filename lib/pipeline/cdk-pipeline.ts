@@ -27,6 +27,7 @@ export class MyCdkPipelineProjectStack extends cdk.Stack {
         projectName: `${QUALIFIER}-CDK-Synth-CodeBuild-Project`,
         env: ENVIRONMENT,
       }),
+      selfMutation: false,
       selfMutationCodeBuildDefaults: { buildEnvironment: { environmentVariables: CODE_BUILD_ENV_VARS } },
     });
 
@@ -36,15 +37,16 @@ export class MyCdkPipelineProjectStack extends cdk.Stack {
     this.addStageForMultipleRegions(pipeline, 'S3Deployment', S3BucketStack, [
       //   { account: ACCOUNTS.OLLION_SANDBOX, region: 'us-east-1' },
       { account: ACCOUNTS.QUICKSIGHT, region: 'us-east-1' },
+      { account: ACCOUNTS.NON_PROD_APP, region: 'us-east-1' },
       // Add other account/region combinations as needed
     ]);
 
     // Add ClientStack for multiple regions and accounts
-    // this.addStageForMultipleRegions(pipeline, 'ClientStackDeployment', ClientStack, [
-    // //   { account: ACCOUNTS.OLLION_SANDBOX, region: 'us-east-1' },
-    //   { account: ACCOUNTS.QUICKSIGHT, region: 'us-east-1' },
-    //   // Add other account/region combinations as needed
-    // ]);
+    this.addStageForMultipleRegions(pipeline, 'ClientStackDeployment', ClientStack, [
+      //   { account: ACCOUNTS.OLLION_SANDBOX, region: 'us-east-1' },
+      { account: ACCOUNTS.NON_PROD_APP, region: 'us-east-1' },
+      // Add other account/region combinations as needed
+    ]);
   }
 
   // Helper function to add stages for various account/region combos

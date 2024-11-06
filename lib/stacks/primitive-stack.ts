@@ -9,6 +9,7 @@ export class S3BucketStack extends QualifiedHearstStack {
 
     new s3.Bucket(this, 'MyBucket', {
       versioned: true,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
   }
 }
