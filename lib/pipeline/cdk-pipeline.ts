@@ -1,28 +1,29 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-// import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 
-import { CodeBuildStep, CodePipeline, CodePipelineSource, ShellStep } from 'aws-cdk-lib/pipelines';
+import { CodeBuildStep, CodePipeline, CodePipelineSource } from 'aws-cdk-lib/pipelines';
 import { S3BucketStack } from '../stacks/primitive-stack';
 import { ClientStack, ClientStackProps } from '../stacks/client-stack';
 import { ACCOUNTS, QUALIFIER } from '../config/aws';
-import { getEnvVar } from '../utils/env';
 import { CODE_BUILD_ENV_VARS, ENVIRONMENT } from '../config/environment';
+import { CurProcessorStack, CurProcessorStackProps } from '../stacks/cur-processor-stack';
+import { CUR_PROCESSOR_STACK_CONFIG } from '../config/cur-processor.config';
+import { CLIENT_STACK_CONFIG } from '../config/clients.config';
 
-const sourceConnectionArn = getEnvVar('GITHUB_SOURCE_CONNECTION_ARN');
-const githubRepoName = getEnvVar('GITHUB_REPO_NAME');
-export class MyCdkPipelineProjectStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+export interface PipelineStackProps extends cdk.StackProps {
+  githubRepoName: string;
+  sourceConnectionArn: string; // Replace with actual destination bucket ARN
+}
+
+export class PipelineProjectStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props: PipelineStackProps) {
     super(scope, id, props);
-
-    // Assuming the secret is stored as 'my-github-token' in Secrets Manager
-    // const oauthToken = secretsmanager.Secret.fromSecretNameV2(this, 'GithubToken', GITHUB_TOKEN_SECRET_NAME);
 
     const pipeline = new CodePipeline(this, 'Pipeline', {
       pipelineName: `${QUALIFIER}-CurProcessorCDKPipeline`,
       crossAccountKeys: true, // Enable cross-account KMS encryption
       synth: new CodeBuildStep('Synth', {
-        input: CodePipelineSource.connection(githubRepoName, 'ci-cd', { connectionArn: sourceConnectionArn }),
+        input: CodePipelineSource.connection(props.githubRepoName, 'ci-cd', { connectionArn: props.sourceConnectionArn }),
         commands: ['npm ci', 'npm run build', 'npx cdk synth'],
         projectName: `${QUALIFIER}-CDK-Synth-CodeBuild-Project`,
         env: ENVIRONMENT,
@@ -31,15 +32,22 @@ export class MyCdkPipelineProjectStack extends cdk.Stack {
       selfMutationCodeBuildDefaults: { buildEnvironment: { environmentVariables: CODE_BUILD_ENV_VARS } },
     });
 
-    // new cdk.CfnOutput(this, 'sdfa', { value: 'sdf' });
+    // this.addStageForMultipleRegions(pipeline, 'S3Deployment', S3BucketStack, [
+    //   //   { account: ACCOUNTS.OLLION_SANDBOX, region: 'us-east-1' },
+    //   { account: ACCOUNTS.QUICKSIGHT, region: 'us-east-1' },
+    //   { account: ACCOUNTS.NON_PROD_APP, region: 'us-east-1' },
+    // ]);
 
-    // Add S3BucketStack for multiple regions and accounts
-    this.addStageForMultipleRegions(pipeline, 'S3Deployment', S3BucketStack, [
-      //   { account: ACCOUNTS.OLLION_SANDBOX, region: 'us-east-1' },
-      { account: ACCOUNTS.QUICKSIGHT, region: 'us-east-1' },
-      { account: ACCOUNTS.NON_PROD_APP, region: 'us-east-1' },
-      // Add other account/region combinations as needed
-    ]);
+    this.addStageForMultipleRegions(
+      pipeline,
+      'CurProcessor',
+      CurProcessorStack,
+      [
+        //   { account: ACCOUNTS.OLLION_SANDBOX, region: 'us-east-1' },
+        { account: ACCOUNTS.QUICKSIGHT, region: 'us-east-1' },
+      ],
+      { ...CUR_PROCESSOR_STACK_CONFIG } as CurProcessorStackProps,
+    );
 
     // Add ClientStack for multiple regions and accounts
     this.addStageForMultipleRegions(
@@ -49,9 +57,8 @@ export class MyCdkPipelineProjectStack extends cdk.Stack {
       [
         //   { account: ACCOUNTS.OLLION_SANDBOX, region: 'us-east-1' },
         { account: ACCOUNTS.NON_PROD_APP, region: 'us-east-1' },
-        // Add other account/region combinations as needed
       ],
-      { curBucketName: `cur-data-export-bucket` } as ClientStackProps,
+      { ...CLIENT_STACK_CONFIG, curBucketName: `cur-data-export-bucket` } as ClientStackProps,
     );
   }
 
