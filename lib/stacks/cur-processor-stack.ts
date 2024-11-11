@@ -48,17 +48,17 @@ export class CurProcessorStack extends QualifiedHearstStack {
       value: curBucket.bucketArn,
     });
 
-    const processedDataBucket = new s3.Bucket(this, 'ProcessedDataBucket', {
-      versioned: true,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
-    });
+    // const processedDataBucket = new s3.Bucket(this, 'ProcessedDataBucket', {
+    //   versioned: true,
+    //   removalPolicy: cdk.RemovalPolicy.DESTROY,
+    //   autoDeleteObjects: true,
+    // });
 
-    const scriptBucket = new s3.Bucket(this, 'ScriptBucket', {
-      versioned: true,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
-    });
+    // const scriptBucket = new s3.Bucket(this, 'ScriptBucket', {
+    //   versioned: true,
+    //   removalPolicy: cdk.RemovalPolicy.DESTROY,
+    //   autoDeleteObjects: true,
+    // });
 
     // createQuickSightResources(this);
 
