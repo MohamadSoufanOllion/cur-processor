@@ -17,8 +17,6 @@ console.log('CDK DEFAULT ACCOUNT', process.env.CDK_DEFAULT_ACCOUNT);
 
 const currentAccount = process.env.CDK_DEFAULT_ACCOUNT;
 
-const defaultSourceBucketName = 'temp-cur-source-bucket';
-
 let stack, app;
 switch (currentAccount) {
   case ACCOUNTS.INITIAL_SANDBOX: {
@@ -33,6 +31,8 @@ switch (currentAccount) {
 
   case ACCOUNTS.INITIAL_CROSS_ACCOUNT: {
     app = new cdk.App();
+    const defaultSourceBucketName = 'temp-cur-source-bucket';
+
     // Create a different stack or configuration for OLLION_CROSS_ACCOUNT
     stack = new ClientStack(app, `CrossAccountStack/${QUALIFIER}`, {
       stackName: `${QUALIFIER}-CrossAccountStack`,

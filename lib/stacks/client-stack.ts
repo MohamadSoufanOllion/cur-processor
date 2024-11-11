@@ -16,7 +16,9 @@ export class ClientStack extends QualifiedHearstStack {
   constructor(scope: Construct, id: string, props: ClientStackProps) {
     super(scope, id, props);
 
-    const curBucketName = `${this.account}-${props.curBucketName}`;
+    const curSourceAccountNumber = this.account; // Replace with actual account number
+
+    const curBucketName = `${curSourceAccountNumber}-${props.curBucketName}`;
 
     const arnPrincipals = props.bcmCrossAccountArns.map((arn) => new iam.ArnPrincipal(arn));
     const bcmCrossAccountRole = new iam.Role(this, 'CUR-Data-Export-Cross-Account-Role', {
@@ -28,7 +30,6 @@ export class ClientStack extends QualifiedHearstStack {
 
     bcmCrossAccountRole.attachInlinePolicy(new iam.Policy(this, 'BCMInlinePolicy', bcmInlinePolicy));
 
-    const curSourceAccountNumber = this.account; // Replace with actual account number
 
     // IAM Role for replication
     const replicationRole = new iam.Role(this, 'ReplicationRole', {
