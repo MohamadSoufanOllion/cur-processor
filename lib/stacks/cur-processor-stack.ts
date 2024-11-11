@@ -8,6 +8,7 @@ import * as sagemaker from 'aws-cdk-lib/aws-sagemaker';
 import { createQuickSightResources } from '../constructs/quick-sight';
 import { bcmBucketPolicyStatement } from '../constructs/bcm-cross-account-policy';
 import { QualifiedHearstStack } from '../constructs/qualified-hearst-stack';
+import { QUALIFIER } from '../config/aws';
 
 export interface CurProcessorStackProps extends cdk.StackProps {
   curBucketName?: string;
@@ -59,11 +60,11 @@ export class CurProcessorStack extends QualifiedHearstStack {
       autoDeleteObjects: true,
     });
 
-    createQuickSightResources(this);
+    // createQuickSightResources(this);
 
     // createCurProcessorResources(this, { curBucket, processedDataBucket });
 
-    const sagemakerRole = new iam.Role(this, 'SageMakerRole', {
+    const sagemakerRole = new iam.Role(this, `${QUALIFIER}-SageMakerRole`, {
       assumedBy: new iam.ServicePrincipal('sagemaker.amazonaws.com'),
       managedPolicies: [iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSageMakerFullAccess')],
     });
@@ -78,7 +79,7 @@ export class CurProcessorStack extends QualifiedHearstStack {
     const notebookInstance = new sagemaker.CfnNotebookInstance(this, 'NotebookInstance', {
       instanceType: 'ml.t2.medium',
       roleArn: sagemakerRole.roleArn,
-      notebookInstanceName: 'CURProcessingNotebook',
+      notebookInstanceName: `${QUALIFIER}-CURProcessingNotebook`,
       volumeSizeInGb: 10,
       directInternetAccess: 'Enabled',
       rootAccess: 'Enabled',
