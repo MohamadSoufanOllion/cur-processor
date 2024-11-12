@@ -1,6 +1,6 @@
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { getEnvVar } from '../utils/env';
-import { MANAGED_CUR_TAG } from '../config/aws';
+import { ACCOUNTS, MANAGED_CUR_TAG } from '../config/aws';
 
 export const bcmInlinePolicy = {
   policyName: 'bcm-cross-account-data-export',
@@ -111,4 +111,7 @@ export const bcmCfnBucketPolicyStatement = (params: BcmBucketPolicyParams): { Ve
   };
 };
 
-export const BCM_CROSS_ACCOUNT_ARNS = [getEnvVar('SOURCE_USER_ARN'), getEnvVar('SOURCE_ROLE_ARN')];
+export const BCM_CROSS_ACCOUNT_ARNS = [
+  `arn:aws:iam::${ACCOUNTS.QUICKSIGHT}:role/alo-CurProcessor-${ACCOUNTS.QUICKSIGHT}-SageMakerRoleD4FCFA3F-KjeahlLoHnlj`,
+  // getEnvVar('SOURCE_USER_ARN'), getEnvVar('SOURCE_ROLE_ARN')
+];
