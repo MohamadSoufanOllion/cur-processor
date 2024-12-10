@@ -24,7 +24,7 @@ export class ClientStack extends QualifiedHearstStack {
     const bcmCrossAccountRole = new iam.Role(this, 'CUR-Data-Export-Cross-Account-Role', {
       assumedBy: new iam.CompositePrincipal(...arnPrincipals),
       description:
-        'This is a role for Sagemaker notebook role from Quicksight account to assume to trigger the CUR generation for he current account',
+        'This is a role for Sagemaker notebook role from Quicksight account to assume to trigger the CUR generation for he current account -1',
       externalIds: [props.externalId],
     });
 

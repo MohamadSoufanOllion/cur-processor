@@ -13,11 +13,14 @@ import * as s3n from 'aws-cdk-lib/aws-s3-notifications';
 import * as sns from 'aws-cdk-lib/aws-sns';
 import * as snsSubscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
 import * as path from 'path';
+import { CLIENT_STACK_CONFIG } from '../config/clients.config';
+import { CUR_PROCESSOR_STACK_CONFIG } from '../config/cur-processor.config';
+import { ACCOUNTS } from '../config/aws';
 
 const EMAIL_ADDRESS_FOR_NOTIFICATIONS = 'mohamad.soufan@ollion.com';
 const CUR_REPORT_FOLDER_DESTINATION = 'cur-data';
 
-export function createCurProcessorResources(scope: Construct, props: { curBucket: s3.IBucket; processedDataBucket: s3.IBucket }) {
+export function createCurProcessorResources(scope: Construct, props: { curBucket: s3.IBucket; processedDataBucket?: s3.IBucket }) {
   const { curBucket, processedDataBucket } = props;
 
   // Create SNS Topic
@@ -29,27 +32,27 @@ export function createCurProcessorResources(scope: Construct, props: { curBucket
   // snsTopic.addSubscription(new snsSubscriptions.EmailSubscription(EMAIL_ADDRESS_FOR_NOTIFICATIONS));
 
   // CUR Processing Lambda
-  const curProcessingLambda = new lambda.Function(scope, 'CURProcessingLambda', {
-    runtime: lambda.Runtime.PYTHON_3_8,
-    handler: 'cur_processing_handler.main',
-    code: lambda.Code.fromAsset(path.join('lambda/cur_processing')),
-    environment: {
-      PROCESSED_BUCKET_NAME: processedDataBucket.bucketName,
-      SNS_TOPIC_ARN: snsTopic.topicArn,
-    },
-  });
+  // const curProcessingLambda = new lambda.Function(scope, 'CURProcessingLambda', {
+  //   runtime: lambda.Runtime.PYTHON_3_8,
+  //   handler: 'cur_processing_handler.main',
+  //   code: lambda.Code.fromAsset(path.join('lambda/cur_processing')),
+  //   environment: {
+  //     PROCESSED_BUCKET_NAME: processedDataBucket.bucketName,
+  //     SNS_TOPIC_ARN: snsTopic.topicArn,
+  //   },
+  // });
 
   // Data Refresh Lambda
-  const dataRefreshLambda = new lambda.Function(scope, 'DataRefreshLambda', {
-    runtime: lambda.Runtime.PYTHON_3_8,
-    handler: 'data_refresh_handler.main',
-    code: lambda.Code.fromAsset(path.join('lambda/data_refresh')),
-    environment: {
-      CUR_BUCKET_NAME: curBucket.bucketName,
-      PROCESSED_BUCKET_NAME: processedDataBucket.bucketName,
-      SNS_TOPIC_ARN: snsTopic.topicArn,
-    },
-  });
+  // const dataRefreshLambda = new lambda.Function(scope, 'DataRefreshLambda', {
+  //   runtime: lambda.Runtime.PYTHON_3_8,
+  //   handler: 'data_refresh_handler.main',
+  //   code: lambda.Code.fromAsset(path.join('lambda/data_refresh')),
+  //   environment: {
+  //     CUR_BUCKET_NAME: curBucket.bucketName,
+  //     PROCESSED_BUCKET_NAME: processedDataBucket.bucketName,
+  //     SNS_TOPIC_ARN: snsTopic.topicArn,
+  //   },
+  // });
 
   // Define the Lambda function
   // const cloudhealth = new NodejsFunction(scope, 'cloudHealthLambda', {
@@ -73,16 +76,16 @@ export function createCurProcessorResources(scope: Construct, props: { curBucket
   });
 
   // Attach the custom policy to the Lambda function's role
-  curProcessingLambda.addToRolePolicy(headObjectPolicy);
-  curBucket.grantRead(curProcessingLambda);
-  processedDataBucket.grantWrite(curProcessingLambda);
+  // curProcessingLambda.addToRolePolicy(headObjectPolicy);
+  // curBucket.grantRead(curProcessingLambda);
+  // processedDataBucket.grantWrite(curProcessingLambda);
 
-  dataRefreshLambda.addToRolePolicy(headObjectPolicy);
-  curBucket.grantRead(dataRefreshLambda);
-  processedDataBucket.grantWrite(dataRefreshLambda);
+  // dataRefreshLambda.addToRolePolicy(headObjectPolicy);
+  // curBucket.grantRead(dataRefreshLambda);
+  // processedDataBucket.grantWrite(dataRefreshLambda);
 
-  snsTopic.grantPublish(curProcessingLambda);
-  snsTopic.grantPublish(dataRefreshLambda);
+  // snsTopic.grantPublish(curProcessingLambda);
+  // snsTopic.grantPublish(dataRefreshLambda);
 
   const glueRole = new iam.Role(scope, 'GlueJobRole', {
     assumedBy: new iam.ServicePrincipal('glue.amazonaws.com'),
@@ -121,7 +124,7 @@ export function createCurProcessorResources(scope: Construct, props: { curBucket
     targets: {
       s3Targets: [
         {
-          path: `s3://${curBucket.bucketName}/${CUR_REPORT_FOLDER_DESTINATION}/CurProcessorExport/data/BILLING_PERIOD=2024-07/`,
+          path: `s3://${curBucket.bucketName}/${CUR_PROCESSOR_STACK_CONFIG.curS3Prefix}/${ACCOUNTS.NON_PROD_APP}/${CLIENT_STACK_CONFIG.dataExportName}/data/BILLING_PERIOD=2024-11/`,
         },
       ],
     },
@@ -141,12 +144,12 @@ export function createCurProcessorResources(scope: Construct, props: { curBucket
   });
 
   // Trigger Data Refresh Lambda Monthly
-  const rule = new events.Rule(scope, 'MonthlyDataRefreshRule', {
-    schedule: events.Schedule.rate(cdk.Duration.days(30)),
-  });
+  // const rule = new events.Rule(scope, 'MonthlyDataRefreshRule', {
+  //   schedule: events.Schedule.rate(cdk.Duration.days(30)),
+  // });
 
-  rule.addTarget(new targets.LambdaFunction(dataRefreshLambda));
+  // rule.addTarget(new targets.LambdaFunction(dataRefreshLambda));
 
-  // S3 Event Notification for CUR Processing
-  curBucket.addEventNotification(s3.EventType.OBJECT_CREATED, new s3n.LambdaDestination(curProcessingLambda));
+  // // S3 Event Notification for CUR Processing
+  // curBucket.addEventNotification(s3.EventType.OBJECT_CREATED, new s3n.LambdaDestination(curProcessingLambda));
 }
