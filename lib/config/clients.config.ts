@@ -7,4 +7,5 @@ export const CLIENT_STACK_CONFIG = {
   bcmCrossAccountArns: BCM_CROSS_ACCOUNT_ARNS,
   destinationBucketArn: getEnvVar('DEST_BUCKET_ARN'), // Replace with actual destination bucket ARN
   destinationAccount: ACCOUNTS.QUICKSIGHT,
+  dataExportName: 'CrossAccount-CostUsageReport',
 };

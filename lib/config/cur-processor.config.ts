@@ -8,4 +8,5 @@ export const CUR_PROCESSOR_STACK_CONFIG = {
   clientsBcmCrossAccountRolesArns: [
     `arn:aws:iam::${ACCOUNTS.NON_PROD_APP}:role/alo-ClientStackDeployment-CURDataExportCrossAccount-CEgJgR0VmEGB`,
   ],
+  curS3Prefix: 'cross-account-cur'
 };

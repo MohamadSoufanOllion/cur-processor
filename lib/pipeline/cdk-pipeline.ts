@@ -60,6 +60,7 @@ export class PipelineProjectStack extends cdk.Stack {
       ],
       { ...CLIENT_STACK_CONFIG, curBucketName: `cur-data-export-bucket` } as ClientStackProps,
     );
+    
   }
 
   // Helper function to add stages for various account/region combos

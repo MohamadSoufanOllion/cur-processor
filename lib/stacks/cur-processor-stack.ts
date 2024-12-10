@@ -9,6 +9,7 @@ import { createQuickSightResources } from '../constructs/quick-sight';
 import { bcmBucketPolicyStatement } from '../constructs/bcm-cross-account-policy';
 import { QualifiedHearstStack } from '../constructs/qualified-hearst-stack';
 import { QUALIFIER } from '../config/aws';
+import { createCurProcessorResources } from '../constructs/cur-processor';
 
 export interface CurProcessorStackProps extends cdk.StackProps {
   curBucketName?: string;
@@ -60,9 +61,9 @@ export class CurProcessorStack extends QualifiedHearstStack {
     //   autoDeleteObjects: true,
     // });
 
-    // createQuickSightResources(this);
+    createQuickSightResources(this);
 
-    // createCurProcessorResources(this, { curBucket, processedDataBucket });
+    createCurProcessorResources(this, { curBucket });
 
     const sagemakerRole = new iam.Role(this, `${QUALIFIER}-SageMakerRole`, {
       assumedBy: new iam.ServicePrincipal('sagemaker.amazonaws.com'),
